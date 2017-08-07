@@ -1,0 +1,12 @@
+做项目用到echarts2.2.7版本做树图，遇到点击树图节点“更改样式”(并不能更改样式，只能换图标/图片），百度、谷歌搜索后均没找到解决方案。后来苦苦探索，终于找到解决入口，特地分享给大家以供参考，吐槽一下echarts的api真的没有highcharts人性化和易找。
+
+  //贴出关键点！
+    function clickFun(param) {
+        console.log(param);
+        param.data.symbol = 'image://http://www.viastreaming.com/images/apple_logo2.png';
+        //远程加载图片最好先预加载过来，避免下载图标延迟。 /**var oImg = new Image();oImg.src = img;**/
+        console.log(param.data.cusField);
+        chart.refresh(); //一定要refresh，否则不起作用
+    }
+
+    注意：对于chart.refresh()操作尽量不要在hover和mouseout事件里用！否则会导致不停的刷新（只要鼠标在图标上稍微动一下会不断的触发hover），会有一种卡顿的感觉，而且会导致tooltip不能及时出现或被卡在一个节点不消失。(本想设置在同一节点hover没有mouseout之前只触发一次，但是很奇怪第一次hover时鼠标没有离开节点也会触发mouseout一次，比较难控制）。

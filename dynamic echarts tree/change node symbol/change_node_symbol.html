@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <meta charset="UTF-8">
+    <title>echarts demo</title>
+    <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+    <script type="text/javascript">
+    var chart;
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+    require(['echarts', 'echarts/chart/tree'], function(ec) {
+        chart = ec.init($("#main")[0]);
+        chart.setOption(option);
+        var ecConfig = require('echarts/config');
+        chart.on(ecConfig.EVENT.CLICK, clickFun); //也可以注册其他时间 hover 、mouseout等
+    })
+ 
+ 
+    var option = {
+        tooltip: {
+            trigger: 'item',
+            formatter: '{b}:{c}',
+            hideDelay: 0 // chart.refresh();刷新时会维持当时图表的所有状态，所以设置隐藏延迟为0，否则在快速选择另一个节点时（尤其是数据比较多时）导致无法显示选择中的tooltip
+            //无法完全避免但是很大减轻了副作用
+        },
+        series: [{
+            name: '树图',
+            type: 'tree',
+            orient: 'horizontal', // vertical horizontal
+            rootLocation: { x: '10%', y: '60%' }, // 根节点位置  {x: 'center',y: 10}
+            nodePadding: 20, //智能定义全局最小节点间距，不能定义层级节点间距，有点搓。
+            symbol: 'circle',
+            symbolSize: 40,
+            roam: true,
+            data: [{
+                name: '手机',
+                value: 6,
+                symbolSize: [90, 70],
+                cusField: 'category',
+                symbol: 'image://http://www.iconpng.com/png/ecommerce-business/iphone.png',
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true,
+                            position: 'right',
+                            formatter: '{b}'
+                        }
+                    }
+                },
+                children: [{
+                        name: '小\n米', //由于label的formatter存在bug，所以无法通过html进行格式化，如果要换行要用\n
+                        value: 4,
+                        symbol: 'image://http://pic.58pic.com/58pic/12/36/51/66d58PICMUV.jpg',
+                        symbolSize: [60, 60],
+                        cusField: 'product',
+                        children: [{
+                            name: '小米11',
+                            symbol: 'circle',
+                            cusField: 'product', //自定义属性，演示用，实际开发中可以在后台建模产生series整个data时增加而外属性以供使用
+                            itemStyle: {
+                                normal: {
+                                    label: {
+                                        show: true,
+                                        position: 'bottom',
+                                        formatter: '{b}--->>>'
+                                    }
+                                }
+                            }
+                        }],
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true,
+                                    position: 'right',
+                                    formatter: '{b}--->>>' //有bug，formatter不起作用，这个bug看网友求助已经很久了，但是后面更新的版本一直没有解决
+                                }
+                            }
+                        }
+                    },
+                    {
+                        name: '苹果',
+                        symbol: 'image://http://www.viastreaming.com/images/apple_logo2.png',
+                        symbolSize: [60, 60],
+                        cusField: 'product',
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: false
+                                }
+ 
+                            }
+                        },
+                        value: 4
+                    }
+ 
+                ]
+            }]
+        }]
+    };
+    //关键点！
+    function clickFun(param) {
+        console.log(param);
+        param.data.symbol = 'image://http://www.viastreaming.com/images/apple_logo2.png';
+         //远程加载图片最好先预加载过来，避免下载图标延迟。 var oImg = new Image();oImg.src = img;
+        console.log(param.data.cusField);
+        chart.refresh(); //一定要refresh，否则不起作用
+    }
+    </script>
+</head>
+ 
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="height:400px"></div>
+</body>
+ 
+</html>
