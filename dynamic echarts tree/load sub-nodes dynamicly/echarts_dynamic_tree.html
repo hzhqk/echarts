@@ -109,7 +109,7 @@
         if(param.data.children)
             param.data.children.push(mockData1);
         else
-            param.data.children = [mockData1,mockData2];
+            param.data.children = [deepCopy(mockData1),deepCopy(mockData2)];
         // console.log(param);
         chart.refresh(); //一定要refresh，否则不起作用
     }
