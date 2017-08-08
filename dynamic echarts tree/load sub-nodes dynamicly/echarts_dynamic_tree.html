@@ -123,7 +123,8 @@
                 param.data.children = param.data.children_bak;
             }
             else {
-                param.data.children = param.data.children ? param.data.children : [deepCopy(mockData1),deepCopy(mockData2)]; //加载数据，此处用测试数据
+            	//TODO load data from server
+                param.data.children = [deepCopy(mockData1),deepCopy(mockData2)]; //加载数据，此处用测试数据
             }
         } else {
             console.log('close');
