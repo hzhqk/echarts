@@ -1,0 +1,48 @@
+   看到网上关于echarts tree的资料有点少，做项目恰巧遇到这个，把一些获得分享给大家。
+    从echarts、官方API中我们似乎只能定义根节点的位置，并不能指定树图整体的大小以及其整体在dom显示的位置，在tree生成过程中只是以根节点向下方左右两边扩展。从echarts官网提供的API我们可以知道var chart = echarts.init(dom); chart.getZrender();获取其封装的canvas库ZRender实例，通过调整这个实例来干预其基层模块自定义其显示。
+   下面为大家分享我的实现自定义显示tree整体效果的过程，由于中间测试数据占的行数太多，我就不整个贴出来源码了，进提供关键部分的代码及说明。想要完整代码的朋友可以下载附件。（由于是项目中的设计抽取出来经过修改来分享的，有些实现部分可能看起来怪怪的，大家见谅，看关键部分就ok了）
+
+
+var myGlobalTreeChart;
+var treeNodePadding = 90; //节点间最小间隔
+var treeTopPadding = 120; //tree距顶端的距离
+ 
+function doGlobalTreeChart(ec,data) {
+    myGlobalTreeChart.setOption(getGlobalTreeOption());
+    //生成图表后做调整
+    adjustTreeView();
+}
+ 
+function adjustTreeView() {
+    var zr = myGlobalTreeChart.getZrender();
+    var domWidth = zr.painter.getWidth();
+    var treeWidth = getTreeWidth(zr);
+    if (treeWidth <= domWidth)
+        return;
+    var adjustSize = domWidth / treeWidth  * 0.95; //多缩小0.05不至于完全充盈dom
+    var lastNodeX = zr.storage._roots[zr.storage._shapeListOffset - 1].style.x * adjustSize;
+    var rightOffset = (domWidth - lastNodeX) - (domWidth - treeWidth * adjustSize)/2; //尽可能的让其居中
+//  console.log(adjustSize);
+//  console.log(domWidth + '  ' + 'lastNodeX: ' + lastNodeX + '      off2R: ' + rightOffset);
+    zr.painter._layers[1].scale = [ adjustSize, adjustSize, 0, 0 ]; //前两个为缩放大小，后两个为缩放原点
+    zr.painter._layers[1].position = [rightOffset, treeTopPadding ]; //偏移量
+    myGlobalTreeChart.refresh();
+}
+//根据最左边和最右边节点(节点symbol为image或icon）的位置算出其间隔即是树图的宽度
+function getTreeWidth(zr) {
+    var nodes = zr.storage._roots;
+    var max = 0;
+    var min = 0;
+    for(var i=0; i < nodes.length; i++){
+        if(nodes[i].type == 'icon' || nodes[i].type == 'image'){ //源码中只判断是否为icon，当symbol设置为图片时请注意
+            var nodeX = nodes[i].style.x;
+            if(nodeX > max){
+                max = nodeX;
+                continue;
+            }
+            if(nodeX < min)
+                min = nodeX;
+        }
+    }
+    return  max - min;
+}
