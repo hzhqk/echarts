@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>echarts-map-line</title>
+    <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="echarts3.7.1.js"></script>
+</head>
+<body>
+<div id="chinaMap" style="width: 1000px;height: 800px;margin:0 auto"></div>
+<script type="text/javascript">
+    $(function () {
+        loadChart();
+    });
+    function loadChart() {
+        $.getJSON("china.json", function (data) {
+            echarts.registerMap('china', data);
+            var myChart = echarts.init(document.getElementById('chinaMap'));
+            var geoCoordMap = {
+                '北京': [116.4551, 40.2539],
+                '上海': [135.4648, 43.2891],
+                '丹东': [125.541, 40.4242]
+            };
+
+            var BJData = [
+                [{name: '北京'}, {name: '丹东', value: 50}, {name: '上海', value: 95}]
+            ];
+
+            var convertLineData = function (data) {
+                var res = [];
+                for (var i = 0; i < data.length; i++) {
+                    var dataItem = data[i];
+                    var coordS = dataItem.lineS; //线起点
+                    var coordM = dataItem.lineM; //线中间点
+                    var coordE = dataItem.lineE; //线尾点
+                    if (coordS && coordM && coordE) {
+                        res.push({
+                            coords: [coordS, coordM, coordE]
+                        });
+                    }
+                }
+                return res;
+            };
+            var convertValData = function (data) {
+                var res = [];
+                for (var i = 0; i < data.length; i++) {
+                    var dataItem = data[i];
+                    res.push({
+                        name: dataItem.areaName,
+                        value: dataItem.lineE.concat(dataItem.value)
+                    });
+                }
+                return res;
+            };
+            var json = {
+                data: [{
+                    areaName: '北京',
+                    value: 94,
+                    lineS: [116.4551, 40.2539],
+                    lineM: [125.541, 40.4242],
+                    lineE: [135.4648, 43.2891]
+                },{
+                    areaName: '上海',
+                    value: 90,
+                    lineS: [121.4648,31.2891],
+                    lineM: [125.4648,31.2891],
+                    lineE: [127.4648,36.2891]
+                }]
+            };
+            var data = json.data;
+            var series = [];
+            series.push(
+                {
+                    name: '',
+                    type: 'lines',
+                    zlevel: 2,
+                    symbol: 'none',
+                    silent: true, //不响应鼠标点击或事件
+                    effect: {
+                        show: false //关闭特效
+                    },
+                    tooltip: {
+                        show: false
+                    },
+                    polyline: true, //支持多点连线
+                    lineStyle: {
+                        normal: {
+                            color: 'white',
+                            width: 1.5,
+                            opacity: 0.9,
+                            curveness: 0
+                        }
+                    },
+                    data: convertLineData(data)
+                },
+                {
+                    name: '',
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    zlevel: 2,
+                    hoverAnimation: false, //hover时不高亮点
+                    cursor: 'default', //鼠标设置为箭头
+                    itemStyle: {
+                        normal: {
+                            color: 'orange'
+                        }
+                    },
+                    tooltip: {
+                        show: false
+                    },
+                    label: {
+                        normal: {
+                            show: true,
+                            position: 'right',
+                            fontSize: 25,
+                            fontWeight: 'bold',
+                            color: '#f5a623',
+                            formatter: function (param) {
+                                return param.value[2];
+                            }
+                        }
+                    },
+                    data: convertValData(data)/*[{
+                        name: '94', value: [135.4648, 43.2891, 95],
+
+                    }]*/
+                }
+            );
+
+            var option = {
+                backgroundColor: '#404a59',
+                title: {
+                    text: '模拟迁徙',
+                    subtext: '数据纯属虚构',
+                    left: 'center',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    show: false
+                },
+                geo: {
+                    map: 'china',
+                    label: {
+                        emphasis: {
+                            show: false
+                        }
+                    },
+                    roam: false
+                    /*itemStyle: {
+                        normal: {
+                            areaColor: '#323c48',
+                            borderColor: '#404a59'
+                        },
+                        emphasis: {
+                            areaColor: '#2a333d'
+                        }
+                    }*/
+                },
+                series: series
+            };
+            myChart.setOption(option);
+        });
+
+    };
+
+</script>
+
+</body>
+</html>
