@@ -203,7 +203,7 @@
             // 关键点
             myChart.on('CLICK', function(param){
             	if (param.componentType == "series" && param.seriesType == "scatter") {
-					// 换图标            		
+					// 换图标 注意预加载需要用到的图片！否则效果会有延迟            		
             		option.series[param.seriesIndex].symbol = 'image://http://pic.58pic.com/58pic/12/36/51/66d58PICMUV.jpg';
             		myChart.setOption(option);
             	}
